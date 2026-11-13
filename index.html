@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>每日练习</title>
+<style>
+:root { --bg:#f4f5f7; --panel:#fff; --line:#e3e5ea; --text:#1d2330; --mute:#6b7280; --math:#2563eb; --phys:#d97706; --ok:#059669; --bad:#dc2626; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; font: 16px/1.55 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--text); background: var(--bg);
+       padding: 0 0 calc(70px + env(safe-area-inset-bottom)); }
+main { max-width: 640px; margin: 0 auto; padding: 14px 16px; }
+h1 { font-size: 24px; margin: 6px 0 0; }
+.sub { color: var(--mute); font-size: 13px; }
+.hero { display: flex; align-items: flex-end; gap: 12px; }
+.hero > div:first-child { flex: 1; }
+.cd { text-align: right; color: var(--mute); font-size: 12px; line-height: 1.3; }
+.cd b { font-size: 26px; color: var(--bad); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+.card h2 { font-size: 15px; margin: 0 0 8px; }
+.tag { display: inline-block; font-size: 12px; border-radius: 5px; padding: 0 7px; color: #fff; margin-right: 6px; vertical-align: 1px; }
+.tag.数学 { background: var(--math); } .tag.物理 { background: var(--phys); } .tag.其他 { background: var(--mute); }
+.dim { color: var(--mute); }
+.sheet { border-top: 1px solid var(--line); padding: 10px 0 2px; margin-top: 10px; }
+.btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+a.btn, button.btn { flex: 1; min-width: 96px; text-align: center; text-decoration: none; border: 1px solid var(--line); background: #fff; color: var(--text);
+       border-radius: 10px; padding: 10px 8px; font: inherit; font-size: 15px; cursor: pointer; }
+.btn.p { background: var(--math); border-color: var(--math); color: #fff; }
+.btn:disabled { opacity: .5; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+td { padding: 6px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+tr:first-child td { border-top: 0; } tr.now td { background: #fffbeb; font-weight: 600; }
+td:first-child { white-space: nowrap; color: var(--mute); width: 1%; padding-right: 10px; }
+.row { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); text-decoration: none; color: inherit; }
+.row:first-of-type { border-top: 0; } .row span.n { flex: 1; min-width: 0; } .row small { display: block; color: var(--mute); font-size: 12px; }
+h3 { font-size: 13px; color: var(--mute); margin: 16px 2px 2px; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex: none; }
+.seg button { border: 0; background: #fff; padding: 6px 9px; font: inherit; font-size: 13px; color: var(--mute); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on.已学 { background: var(--ok); color: #fff; } .seg button.on.正在学 { background: var(--phys); color: #fff; } .seg button.on.未学 { background: #9ca3af; color: #fff; }
+select, input[type=password], input[type=text] { width: 100%; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.thumbs img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.msg { margin-top: 10px; font-size: 14px; } .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+nav { position: fixed; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); display: flex;
+      padding-bottom: env(safe-area-inset-bottom); }
+nav button { flex: 1; border: 0; background: none; padding: 9px 0 8px; font: inherit; font-size: 12px; color: var(--mute); }
+nav button b { display: block; font-size: 20px; font-weight: 400; line-height: 1.2; }
+nav button.on { color: var(--math); font-weight: 600; }
+section { display: none; } section.on { display: block; }
+</style>
+</head>
+<body>
+<main>
+<section id="s-today"></section>
+<section id="s-files"></section>
+<section id="s-up">
+  <h1>上传作业照片</h1><div class="sub">做完后拍照上传，批改完会按错题出下一份练习</div>
+  <div class="card" id="keycard"><h2>第一次使用：输入口令</h2>
+    <p class="dim" style="margin:0 0 8px;font-size:14px">口令找家长要，只需要输入一次。</p>
+    <input type="password" id="key" placeholder="粘贴口令" autocomplete="off">
+    <div class="btns"><button class="btn p" id="keysave">保存口令</button></div><div class="msg" id="keymsg"></div></div>
+  <div class="card"><h2>① 这是哪一份练习？</h2><select id="which"></select>
+    <h2 style="margin-top:14px">② 选照片（可以一次选多张）</h2>
+    <input type="file" id="pick" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="btns"><button class="btn p" id="send" disabled>上传</button></div><div class="msg" id="upmsg"></div></div>
+  <div class="card"><button class="btn" id="keyreset" style="width:100%">重新输入口令</button></div>
+</section>
+<section id="s-prog"></section>
+</main>
+<nav>
+  <button data-t="today" class="on"><b>🏠</b>今天</button>
+  <button data-t="files"><b>📚</b>资料</button>
+  <button data-t="up"><b>📷</b>上传</button>
+  <button data-t="prog"><b>📌</b>进度</button>
+</nav>
+<script>
+const D = {"build": "2026-11-13 22:04", "inbox": "coardev2026/g8-inbox", "prog": {"saved": "2026-11-13T23:59:00", "exam": "2027-01-05", "items": [["物理", "第1章 机械运动", "已学"], ["物理", "第2章 声现象", "已学"], ["物理", "第3章 物态变化", "已学"], ["物理", "第4章 光现象", "已学"], ["物理", "第5章 5.1 透镜", "已学"], ["物理", "第5章 5.2 生活中的透镜", "已学"], ["物理", "第5章 5.3 凸透镜成像的规律", "已学"], ["物理", "第5章 5.4 眼睛和眼镜", "未学"], ["物理", "第5章 5.5 显微镜和望远镜", "未学"], ["物理", "第6章 6.1 质量", "未学"], ["物理", "第6章 6.2 密度", "未学"], ["物理", "第6章 6.3 测量物质的密度", "未学"], ["物理", "第6章 6.4 密度的应用", "未学"], ["数学", "第1章 勾股定理", "已学"], ["数学", "第2章 实数", "已学"], ["数学", "第3章 位置与坐标", "已学"], ["数学", "第4章 一次函数", "已学"], ["数学", "第5章 方程组的解法（代入、加减）", "已学"], ["数学", "第5章 方程组的应用题", "已学"], ["数学", "第5章 二元一次方程与一次函数", "已学"], ["数学", "第5章 用方程组确定一次函数表达式", "未学"], ["数学", "第5章 三元一次方程组", "未学"], ["数学", "第6章 平均数", "未学"], ["数学", "第6章 中位数与众数", "未学"], ["数学", "第6章 数据的离散程度（方差）", "未学"], ["数学", "第7章 定义与命题", "未学"], ["数学", "第7章 平行线的判定", "未学"], ["数学", "第7章 平行线的性质", "未学"], ["数学", "第7章 三角形内角和定理", "未学"]]}, "plan": [{"d": "2026-11-13", "s": "物理", "t": "期中卷第 1～15 题中的错题，盖住答案重做；读《物理期中分析》第二部分"}, {"d": "2026-11-14", "s": "数学", "t": "订正 11/13 数学练习的错题；读《数学知识点总结 第五章》第三部分（应用题类型表）"}, {"d": "2026-11-15", "s": "物理", "t": "《物理模拟卷 01》限时 60 分钟（摸底，不会的先跳过），对答案，填自我分析表"}, {"d": "2026-11-16", "s": "物理", "t": "订正模拟卷 01；光的直线传播；“直线传播／反射／折射”现象分类 20 例"}, {"d": "2026-11-17", "s": "数学", "t": "平方根、算术平方根、立方根的区别（期中第 4、6 题类型）；无理数的判断"}, {"d": "2026-11-18", "s": "物理", "t": "光的反射定律；入射角、反射角的计算；镜面反射和漫反射；反射作图 3 题"}, {"d": "2026-11-19", "s": "数学", "t": "二次根式的化简与计算（分母有理化、完全平方）；自变量取值范围（期中第 11 题）"}, {"d": "2026-11-20", "s": "物理", "t": "平面镜成像：特点、实验的标准说法、作图 3 题；凸面镜和凹面镜"}, {"d": "2026-11-21", "s": "数学", "t": "坐标：点到 x 轴、y 轴的距离（期中第 3 题）；关于坐标轴对称；各象限符号"}, {"d": "2026-11-22", "s": "数学", "t": "数学周测（40 分钟：实数＋坐标）＋订正；或休息"}, {"d": "2026-11-23", "s": "物理", "t": "光的折射规律；“看水中的鱼”“池水变浅”；色散、三原色、红外线和紫外线；折射作图 3 题"}, {"d": "2026-11-24", "s": "数学", "t": "勾股定理计算；勾股数；逆定理判断直角三角形（期中第 2 题）"}, {"d": "2026-11-25", "s": "物理", "t": "光现象综合练习（期中第 4、6、8、13、14 题类型）；光路可逆"}, {"d": "2026-11-26", "s": "数学", "t": "勾股定理应用：设未知数列方程（期中第 18 题）、折叠、弦图（期中第 13、14 题）"}, {"d": "2026-11-27", "s": "物理", "t": "温度计的使用和读数（含零下）；熔化和凝固；晶体与非晶体的图像"}], "sheets": [{"id": "1113_物理", "date": "2026-11-13", "subject": "物理", "title": "期中错题同类练习", "pdf": "f/物理/每日练习/1113_物理_期中错题同类练习.pdf", "ans": "f/物理/每日练习/1113_物理_期中错题同类练习_答案.pdf"}, {"id": "1113_数学", "date": "2026-11-13", "subject": "数学", "title": "期中错题同类练习", "pdf": "f/数学/每日练习/1113_数学_期中错题同类练习.pdf", "ans": "f/数学/每日练习/1113_数学_期中错题同类练习_答案.pdf"}], "files": [{"t": "物理 期中错题同类练习", "d": "2026-11-13", "s": "物理", "k": "每日练习", "f": "f/物理/每日练习/1113_物理_期中错题同类练习.pdf"}, {"t": "物理 期中错题同类练习 答案", "d": "2026-11-13", "s": "物理", "k": "每日练习", "f": "f/物理/每日练习/1113_物理_期中错题同类练习_答案.pdf"}, {"t": "物理模拟卷01", "d": "2026-11-12", "s": "物理", "k": "模拟卷", "f": "f/物理/模拟卷/物理模拟卷01.pdf"}, {"t": "物理模拟卷01 答案解析", "d": "2026-11-12", "s": "物理", "k": "模拟卷", "f": "f/物理/模拟卷/物理模拟卷01_答案解析.pdf"}, {"t": "物理知识点总结 前四章", "d": "2026-11-12", "s": "物理", "k": "知识点", "f": "f/物理/知识点/物理知识点总结_前四章.pdf"}, {"t": "物理知识点总结 第五章透镜", "d": "2026-11-13", "s": "物理", "k": "知识点", "f": "f/物理/知识点/物理知识点总结_第五章透镜.pdf"}, {"t": "数学 期中错题同类练习", "d": "2026-11-13", "s": "数学", "k": "每日练习", "f": "f/数学/每日练习/1113_数学_期中错题同类练习.pdf"}, {"t": "数学 期中错题同类练习 答案", "d": "2026-11-13", "s": "数学", "k": "每日练习", "f": "f/数学/每日练习/1113_数学_期中错题同类练习_答案.pdf"}, {"t": "数学知识点总结 第五章二元一次方程组", "d": "2026-11-13", "s": "数学", "k": "知识点", "f": "f/数学/知识点/数学知识点总结_第五章二元一次方程组.pdf"}]};
+const WK = "日一二三四五六", $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const TODAY = iso(new Date());
+const url = f => f.split("/").map(encodeURIComponent).join("/");
+const tag = s => `<span class="tag ${s}">${s}</span>`;
+const md = d => { const x = new Date(d + "T00:00:00"); return `${x.getMonth() + 1} 月 ${x.getDate()} 日 周${WK[x.getDay()]}`; };
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: (k, v) => { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+
+function sheetHtml(s, withDate) {
+  return `<div class="sheet">${tag(s.subject)}${withDate ? s.date.slice(5).replace("-", "/") + " " : ""}${s.title}
+    <div class="btns"><a class="btn p" href="${url(s.pdf)}" target="_blank">下载题目</a><a class="btn" href="${url(s.ans)}" target="_blank">答案（做完再看）</a>
+    <button class="btn" data-up="${s.id}">上传照片</button></div></div>`;
+}
+function renderToday() {
+  const d = new Date(TODAY + "T00:00:00");
+  let cd = "";
+  if (D.prog.exam) { const n = Math.round((new Date(D.prog.exam + "T00:00:00") - d) / 864e5);
+    if (n >= 0) cd = `<div class="cd">距期末还有<br><b>${n}</b> 天</div>`; }
+  let h = `<div class="hero"><div><h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 周${WK[d.getDay()]}</h1><div class="sub">更新于 ${D.build}</div></div>${cd}</div>`;
+  const plan = D.plan.filter(p => p.d === TODAY), mine = D.sheets.filter(s => s.date === TODAY);
+  h += `<div class="card"><h2>今天的任务</h2>` + (plan.length ? plan.map(p => `<div>${tag(p.s)}${p.t}</div>`).join("") : `<div class="dim">今天没有安排，休息或者订正错题。</div>`) +
+    (mine.length ? mine.map(s => sheetHtml(s)).join("") : `<div class="dim" style="margin-top:8px">今天的练习还没有发布。</div>`) + `</div>`;
+  const prev = D.sheets.filter(s => s.date < TODAY).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
+  if (prev.length) h += `<div class="card"><h2>前几天的练习</h2>` + prev.map(s => sheetHtml(s, 1)).join("").replace('class="sheet"', 'class="sheet" style="border-top:0;margin-top:0;padding-top:0"') + `</div>`;
+  const days = []; for (let i = 0; i < 7; i++) { const x = new Date(d); x.setDate(x.getDate() + i); days.push(iso(x)); }
+  h += `<div class="card"><h2>接下来 7 天</h2><table>` + days.map(x => { const dd = new Date(x + "T00:00:00"), ps = D.plan.filter(p => p.d === x);
+    return `<tr class="${x === TODAY ? "now" : ""}"><td>${dd.getMonth() + 1}/${dd.getDate()} 周${WK[dd.getDay()]}</td><td>${ps.length ? ps.map(p => tag(p.s) + p.t).join("<br>") : "—"}</td></tr>`; }).join("") + `</table></div>`;
+  $("s-today").innerHTML = h;
+}
+function renderFiles() {
+  let h = `<h1>资料</h1><div class="sub">所有练习、答案和知识点总结，点一下打开</div>`;
+  const kp = D.files.filter(f => f.k === "知识点");
+  if (kp.length) h += `<div class="card"><h2>知识点总结</h2>` + kp.map(row).join("") + `</div>`;
+  const rest = D.files.filter(f => f.k !== "知识点");
+  [...new Set(rest.map(f => f.d))].sort().reverse().forEach(d => {
+    h += `<h3>${md(d)}</h3><div class="card" style="margin-top:4px">` + rest.filter(f => f.d === d).map(row).join("") + `</div>`; });
+  $("s-files").innerHTML = h;
+  function row(f) { return `<a class="row" href="${url(f.f)}" target="_blank">${tag(f.s)}<span class="n">${f.t}<small>${f.k}</small></span><span class="dim">›</span></a>`; }
+}
+let prog = JSON.parse(JSON.stringify(D.prog));
+function renderProg(msg, cls) {
+  let h = `<h1>学校进度</h1><div class="sub">学校讲到哪里就改到哪里，改完点最下面的保存。练习只会出“已学”的内容。</div>`, sub = "";
+  prog.items.forEach((it, i) => {
+    if (it[0] !== sub) { if (sub) h += `</div>`; sub = it[0]; h += `<h3>${sub}</h3><div class="card" style="margin-top:4px">`; }
+    h += `<div class="row"><span class="n">${it[1]}</span><div class="seg" data-i="${i}">` +
+      ["未学", "正在学", "已学"].map(v => `<button class="${v}${it[2] === v ? " on" : ""}">${v}</button>`).join("") + `</div></div>`; });
+  h += `</div><div class="btns"><button class="btn p" id="psave">保存进度</button></div><div class="msg ${cls || ""}" id="pmsg">${msg || ""}</div>`;
+  $("s-prog").innerHTML = h;
+}
+function tab(t) {
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "s-" + t));
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+  scrollTo(0, 0);
+}
+document.querySelector("nav").onclick = e => { const b = e.target.closest("button"); if (b) tab(b.dataset.t); };
+
+/* ---- 上传：写入私有仓库 D.inbox，需要口令（只对该仓库有写权限的 token，存在本机浏览器里） ---- */
+const api = (path, opt = {}) => fetch(`https://api.github.com/repos/${D.inbox}${path}`, Object.assign({}, opt, {
+  headers: { Authorization: "Bearer " + store.get("key"), Accept: "application/vnd.github+json" } }));
+const b64 = s => btoa(unescape(encodeURIComponent(s)));
+const stamp = () => { const d = new Date(); return `${iso(d)}T${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`; };
+async function put(path, content64, message) {
+  const r = await api("/contents/" + url(path), { method: "PUT", body: JSON.stringify({ message, content: content64 }) });
+  if (!r.ok) throw new Error(r.status === 401 || r.status === 403 || r.status === 404 ? "口令不对或已过期，请找家长要新的口令" : "上传失败（" + r.status + "）");
+}
+function keyUi() { const has = !!store.get("key"); $("keycard").style.display = has ? "none" : ""; $("keyreset").parentElement.style.display = has ? "" : "none"; refreshSend(); }
+$("keysave").onclick = async () => {
+  const k = $("key").value.trim(); if (!k) return;
+  store.set("key", k); $("keymsg").className = "msg"; $("keymsg").textContent = "正在检查…";
+  try { const r = await api(""); if (!r.ok) throw 0; $("key").value = ""; keyUi(); }
+  catch (e) { store.set("key", null); $("keymsg").className = "msg bad"; $("keymsg").textContent = "口令不对，或者现在连不上服务器。请检查后再试。"; }
+};
+$("keyreset").onclick = () => { store.set("key", null); keyUi(); };
+let picked = [];
+function refreshSend() { $("send").disabled = !picked.length || !store.get("key"); }
+async function shrink(file) {
+  const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(file); });
+  const k = Math.min(1, 1800 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+  c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.82);
+}
+$("pick").onchange = async e => {
+  $("upmsg").className = "msg"; $("upmsg").textContent = "正在处理照片…"; picked = [];
+  for (const f of e.target.files) { try { picked.push(await shrink(f)); } catch (err) {} }
+  $("thumbs").innerHTML = picked.map(p => `<img src="${p}" alt="">`).join("");
+  $("upmsg").textContent = picked.length ? `已选 ${picked.length} 张` : "这些文件不是能识别的照片，请重新选"; refreshSend();
+};
+$("send").onclick = async () => {
+  const id = $("which").value, t = stamp(); $("send").disabled = true; $("upmsg").className = "msg";
+  try {
+    for (let i = 0; i < picked.length; i++) {
+      $("upmsg").textContent = `正在上传第 ${i + 1} / ${picked.length} 张…`;
+      await put(`uploads/${TODAY}/${id}_${t.slice(11)}_${i + 1}.jpg`, picked[i].split(",")[1], `upload ${id}`);
+    }
+    $("upmsg").className = "msg ok"; $("upmsg").textContent = `上传成功 ✓ 共 ${picked.length} 张。`;
+    picked = []; $("thumbs").innerHTML = ""; $("pick").value = "";
+  } catch (err) { $("upmsg").className = "msg bad"; $("upmsg").textContent = (err.message || "上传失败") + "　已选的照片还在，可以再点一次上传。"; }
+  refreshSend();
+};
+document.addEventListener("click", async e => {
+  const up = e.target.closest("[data-up]");
+  if (up) { $("which").value = up.dataset.up; tab("up"); return; }
+  const seg = e.target.closest(".seg");
+  if (seg && e.target.tagName === "BUTTON") { prog.items[+seg.dataset.i][2] = e.target.textContent;
+    [...seg.children].forEach(b => b.classList.toggle("on", b === e.target)); return; }
+  if (e.target.id === "psave") {
+    if (!store.get("key")) { renderProg("还没有输入口令：先到“上传”页输入一次口令。", "bad"); return; }
+    e.target.disabled = true;
+    const t = stamp(); prog.saved = t.slice(0, 10) + "T" + t.slice(11).replace(/-/g, ":");
+    try { await put(`progress/${t}.json`, b64(JSON.stringify(prog, null, 1)), "progress"); renderProg("已保存 ✓", "ok"); }
+    catch (err) { renderProg(err.message || "保存失败，请稍后再试", "bad"); }
+  }
+});
+$("which").innerHTML = [...D.sheets].sort((a, b) => b.date.localeCompare(a.date)).map(s =>
+  `<option value="${s.id}">${s.date.slice(5).replace("-", "/")} ${s.subject} ${s.title}</option>`).join("") + `<option value="其他">其他（学校作业、试卷等）</option>`;
+renderToday(); renderFiles(); renderProg(); keyUi(); tab("today");
+</script>
+</body>
+</html>
