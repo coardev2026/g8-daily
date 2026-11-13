@@ -153,14 +153,14 @@ function renderFiles() {
 }
 const kpName = k => k.split("/").slice(1).join(" › ");
 function renderMast() {
-  let h = `<h1>掌握情况</h1><div class="sub">根据期中考试、作业和每次练习的批改结果统计，每次批改后更新</div>
+  let h = `<h1>掌握情况</h1><div class="sub">这里只列出<b>错过的</b>知识点，不是全部知识点。做对一次变成橙色，连续做对两次变成绿色。目标：把红色一个一个变绿。</div>
     <div class="card" style="font-size:14px"><span class="st 薄弱">薄弱</span> 最近一次没全对　<span class="st 巩固中">巩固中</span> 最近一次对了<br>
     <span class="st 已掌握" style="display:inline-block;margin-top:6px">已掌握</span> 连续两次都对　　记号：● 对　◐ 半对　○ 错（从旧到新）</div>`;
   if (!D.mastery.length) h += `<div class="card dim">还没有批改记录。</div>`;
   ["物理", "数学"].forEach(sub => {
     const part = D.mastery.filter(m => m.kp.startsWith(sub + "/")); if (!part.length) return;
     const n = st => part.filter(m => m.status === st).length, pc = st => (n(st) / part.length * 100).toFixed(1);
-    h += `<h3>${sub}　共 ${part.length} 个知识点</h3><div class="card" style="margin-top:4px">
+    h += `<h3>${sub}　要攻克的知识点 ${part.length} 个</h3><div class="card" style="margin-top:4px">
       <div class="bar"><i class="a" style="width:${pc("已掌握")}%"></i><i class="b" style="width:${pc("巩固中")}%"></i><i class="c" style="width:${pc("薄弱")}%"></i></div>
       <div class="sub" style="margin-bottom:6px">已掌握 ${n("已掌握")}　巩固中 ${n("巩固中")}　薄弱 ${n("薄弱")}</div>` +
       part.map(m => `<div class="row"><span class="n">${kpName(m.kp)}</span><span class="hist">${m.hist.map(v => v === 1 ? "●" : v === 0 ? "○" : "◐").join("")}</span><span class="st ${m.status}">${m.status}</span></div>`).join("") + `</div>`;
