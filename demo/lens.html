@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0">
+<title>凸透镜成像演示</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 布局：上面一块可操作的光路台，下面是“现在看到什么”和三个问题的一键演示 */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #1c2530; --muted: #5d6b7a; --line: #d5dbe3;
+  --ray: #d9730d; --img: #0b7a75; --lens: #a9c7e8; --lens-edge: #4b7fb5; --accent: #2456a6; --accent-fg: #ffffff; --soft: #e8eef7;
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161c; --panel: #1b212a; --fg: #e8edf3; --muted: #9aa7b6; --line: #333d4a;
+  --ray: #ffab4d; --img: #4fd1c5; --lens: #2c4a6b; --lens-edge: #7fb0e6; --accent: #7fb0e6; --accent-fg: #10151b; --soft: #232c38; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161c; --panel: #1b212a; --fg: #e8edf3; --muted: #9aa7b6; --line: #333d4a;
+  --ray: #ffab4d; --img: #4fd1c5; --lens: #2c4a6b; --lens-edge: #7fb0e6; --accent: #7fb0e6; --accent-fg: #10151b; --soft: #232c38; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 24px; margin: 0; text-wrap: balance; }
+h2 { font-size: 17px; margin: 0 0 6px; }
+p { margin: 0; }
+.lead { color: var(--muted); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.stage { overflow-x: auto; }
+.stage svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.ctrl { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row > label.t { font-weight: 600; min-width: 0; }
+input[type=range] { flex: 1 1 220px; min-width: 0; accent-color: var(--accent); }
+button, .seg label { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+button:hover, .seg label:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible + span, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.two > * { min-width: 0; }
+@media (max-width: 640px) { .two { grid-template-columns: 1fr; } }
+.see { display: flex; gap: 12px; align-items: flex-start; }
+.see svg { flex: 0 0 120px; width: 120px; height: 120px; background: var(--soft); border-radius: 8px; }
+.see div { min-width: 0; }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+dt { color: var(--muted); } dd { margin: 0; font-weight: 600; }
+.qa { display: flex; flex-direction: column; gap: 10px; }
+.qa .panel { display: flex; flex-direction: column; gap: 6px; }
+.qa b { color: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--muted); font-size: 14px; }
+.legend i { display: inline-block; width: 26px; border-top: 3px solid var(--ray); vertical-align: middle; margin-right: 5px; }
+.legend i.d { border-top: 2px dashed var(--muted); } .legend i.g { border-top: 3px solid var(--img); }
+.ray { stroke: var(--ray); stroke-width: 2.2; fill: none; } .ray.thin { stroke-width: 1.2; opacity: .75; }
+.back { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 6 5; fill: none; }
+.sight { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 2 5; fill: none; }
+.axis { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 12 4 2 4; }
+.obj { stroke: var(--fg); stroke-width: 3.5; fill: var(--fg); } .im { stroke: var(--img); stroke-width: 3.5; fill: var(--img); } .im.v { stroke-dasharray: 7 5; }
+.lbl { fill: var(--fg); font-size: 16px; font-family: var(--font); } .lbl.m { fill: var(--muted); } .lbl.g { fill: var(--img); }
+.scr { stroke: var(--fg); stroke-width: 5; } .eye { stroke: var(--fg); stroke-width: 2; fill: none; } .pupil { fill: var(--fg); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>凸透镜成像演示</h1>
+    <p class="lead">拖动滑块移动蜡烛，看光怎么走、像在哪儿。再试试放上光屏、换一下眼睛的位置。</p>
+  </header>
+
+  <section class="panel stage" aria-label="光路图">
+    <svg id="stage" viewBox="0 0 800 380" role="img" aria-label="蜡烛、凸透镜、光线和像"></svg>
+    <div class="legend"><span><i></i>真的光线</span><span><i class="d"></i>往回找的线（没有真的光）</span><span><i class="g"></i>像</span></div>
+  </section>
+
+  <section class="panel ctrl">
+    <div class="row">
+      <label class="t" for="u">蜡烛到透镜的距离</label>
+      <input type="range" id="u" min="0.3" max="3.5" step="0.02" value="2.6">
+      <span id="uTxt"></span>
+    </div>
+    <div class="row" id="presets">
+      <button type="button" data-u="2.6">远处（照相机）</button>
+      <button type="button" data-u="2">正好 2 倍焦距</button>
+      <button type="button" data-u="1.5">焦点和 2 倍焦距之间（投影仪）</button>
+      <button type="button" data-u="1">正好在焦点</button>
+      <button type="button" data-u="0.5">焦点以内（放大镜）</button>
+    </div>
+    <div class="row">
+      <span class="t" style="font-weight:600">光屏</span>
+      <div class="seg" role="radiogroup" aria-label="光屏">
+        <label><input type="radio" name="scr" id="scrOff" value="0" checked><span>不放光屏</span></label>
+        <label><input type="radio" name="scr" id="scrOn" value="1"><span>放上光屏</span></label>
+      </div>
+    </div>
+    <div class="row">
+      <span class="t" style="font-weight:600">眼睛</span>
+      <div class="seg" role="radiogroup" aria-label="眼睛的位置">
+        <label><input type="radio" name="eye" id="eyeThrough" value="through" checked><span>在透镜另一侧，对着透镜看</span></label>
+        <label><input type="radio" name="eye" id="eyeSide" value="side"><span>绕过透镜，直接看蜡烛</span></label>
+      </div>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="panel">
+      <h2>眼睛看到的</h2>
+      <div class="see"><svg id="view" viewBox="0 0 120 120" aria-hidden="true"></svg><div id="seeTxt"></div></div>
+    </section>
+    <section class="panel">
+      <h2>这时候的像</h2>
+      <dl id="facts"></dl>
+    </section>
+  </div>
+
+  <section class="qa">
+    <div class="panel">
+      <h2>问题一　用放大镜时，是不是只能看到虚像？</h2>
+      <p>透过透镜看，看到的只有<b>像</b>。蜡烛发出的光被透镜改了方向，眼睛顺着改过的方向往回找，就以为蜡烛在更远、更大的地方。想看蜡烛本身，要绕过透镜直接看。</p>
+      <div class="row"><button type="button" data-demo="1a">演示：透过透镜看</button><button type="button" data-demo="1b">演示：绕过透镜看</button></div>
+    </div>
+    <div class="panel">
+      <h2>问题二　蜡烛比焦点远时，像和蜡烛都能看到吗？</h2>
+      <p>都能看到，但要换位置。对着透镜看，看到的是另一侧那个<b>倒立的实像</b>；绕过透镜，才是蜡烛本身。凡是穿过透镜的光，看到的都是像。</p>
+      <div class="row"><button type="button" data-demo="2a">演示：对着透镜看</button><button type="button" data-demo="2b">演示：绕过透镜看</button></div>
+    </div>
+    <div class="panel">
+      <h2>问题三　没有光屏会怎么样？</h2>
+      <p>像还在原来的位置。<b>有光屏</b>：光打在屏上向四面散开，站在哪儿都能看到。<b>没有光屏</b>：光交在那一点后继续往前走，只有眼睛正好在光的去路上才看得到。</p>
+      <div class="row"><button type="button" data-demo="3a">演示：有光屏</button><button type="button" data-demo="3b">演示：没有光屏</button></div>
+    </div>
+    <div class="panel">
+      <h2>问题四　虚像为什么接不到光屏？</h2>
+      <p>光屏能接到像，靠的是<b>光真的交在屏上一点</b>。成虚像时，光过了透镜一直在散开，在哪儿都不相交，所以光屏放在透镜后面哪个位置，接到的都只是一片亮光。虚像所在的那个地方（蜡烛那一侧）根本没有透镜过来的光，那里只是眼睛“往回找”出来的位置，光屏放过去也没用。</p>
+      <div class="row"><button type="button" data-demo="3c">演示：放上光屏，只有一片亮光</button><button type="button" data-demo="1a">演示：拿掉光屏，用眼睛看</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const W = 800, H = 380, LX = 400, CY = 200, F = 85, HH = 46, LH = 125;   // 透镜位置、主光轴、焦距、蜡烛高、透镜半高
+  const $ = id => document.getElementById(id);
+  const st = { u: 2.6, scr: false, eye: 'through' };
+  const n = v => (+v).toFixed(1);
+  const line = (x1, y1, x2, y2, c) => `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" class="${c}"/>`;
+  const text = (x, y, s, c = '', a = 'middle') => `<text x="${n(x)}" y="${n(y)}" class="lbl ${c}" text-anchor="${a}">${s}</text>`;
+  const arrow = (x, y0, y1, c) => { const d = y1 < y0 ? 1 : -1, w = 8; return line(x, y0, x, y1 + d * 10, c) + `<polygon points="${n(x)},${n(y1)} ${n(x - w)},${n(y1 + d * 14)} ${n(x + w)},${n(y1 + d * 14)}" class="${c}" style="stroke-dasharray:none;stroke-width:1"/>`; };
+  const mid = (x1, y1, x2, y2, t = .5) => { const a = Math.atan2(y2 - y1, x2 - x1), x = x1 + (x2 - x1) * t, y = y1 + (y2 - y1) * t, s = 9;
+    return `<polygon points="${n(x + s * Math.cos(a))},${n(y + s * Math.sin(a))} ${n(x + s * Math.cos(a + 2.6))},${n(y + s * Math.sin(a + 2.6))} ${n(x + s * Math.cos(a - 2.6))},${n(y + s * Math.sin(a - 2.6))}" style="fill:var(--ray)"/>`; };
+  const eye = (x, y) => `<g transform="translate(${n(x)} ${n(y)})"><path d="M-16 0 Q0 -13 16 0 Q0 13 -16 0Z" class="eye"/><circle cx="0" cy="0" r="5" class="pupil"/></g>`;
+
+  function calc() {
+    const u = st.u * F, atF = Math.abs(st.u - 1) < 0.021;
+    const v = atF ? Infinity : u * F / (u - F);            // v<0：虚像
+    return { u, v, atF, real: !atF && v > 0, m: atF ? Infinity : Math.abs(v / u) };
+  }
+
+  function drawStage() {
+    const { u, v, atF, real, m } = calc(), Ax = LX - u, Ay = CY - HH;
+    let s = line(10, CY, W - 10, CY, 'axis');
+    [[-2, '2F'], [-1, 'F'], [1, 'F'], [2, '2F']].forEach(([k, t]) => { s += `<circle cx="${LX + k * F}" cy="${CY}" r="3.5" style="fill:var(--muted)"/>` + text(LX + k * F, CY + 24, t, 'm'); });
+    s += `<path d="M${LX} ${CY - LH} Q${LX + 30} ${CY} ${LX} ${CY + LH} Q${LX - 30} ${CY} ${LX} ${CY - LH}Z" style="fill:var(--lens);stroke:var(--lens-edge);stroke-width:1.5" opacity=".85"/>` + text(LX, CY - LH - 8, '凸透镜', 'm');
+    s += arrow(Ax, CY, Ay, 'obj') + text(Ax, CY + 24, '蜡烛');
+    const hits = [Ay, CY, CY + 60, CY - 95];                 // 光打在透镜上的几个点：平行的、过光心的、另外两条
+    const Ix = LX + v, Iy = CY + HH * v / u;                 // 像的顶端（虚像时 v<0，自动落在左上方）
+    const scrX = real ? Ix : LX + 190, block = st.scr ? scrX : W + 50;
+    hits.forEach((y, i) => {
+      const c = 'ray' + (i > 1 ? ' thin' : '');
+      s += line(Ax, Ay, LX, y, c) + (i < 2 && u > 90 ? mid(Ax, Ay, LX, y, .55) : '');
+      let k;                                                 // 出射光的斜率
+      if (atF) k = HH / F; else k = (Iy - y) / (Ix - LX);
+      const xe = Math.min(block, W + 50);
+      s += line(LX, y, xe, y + k * (xe - LX), c);
+      if (xe - LX > 60) s += mid(LX, y, xe, y + k * (xe - LX), real ? Math.min(.5, (Ix - LX) * .6 / (xe - LX)) : .5);
+      if (!real && !atF) s += line(Ix, Iy, LX, y, 'back');
+    });
+    if (!atF) {
+      if (real) { if (Ix < W - 5) s += arrow(Ix, CY, Iy, 'im') + text(Ix + (st.scr ? -30 : 0), Iy + 26, '实像', 'g'); }
+      else s += arrow(Ix, CY, Iy, 'im v') + text(Math.max(Ix, 40), Math.max(Iy - 12, 18), '虚像', 'g') + line(Ix, Iy, Ax, Ay, 'back');
+    }
+    if (st.scr && scrX < W - 5) s += line(scrX, CY - 150, scrX, CY + 150, 'scr') + text(scrX, CY - 158, '光屏');
+    if (real && Ix >= W - 5) s += text(W - 14, 40, '像太远，在画面外面 →', 'g', 'end');
+    if (atF) s += text(W - 14, 40, '光是平行的，交不上，没有像', 'g', 'end');
+    // 眼睛
+    if (st.eye === 'side') {
+      const ex = Math.min(LX - 45, Ax + 170), ey = 36;
+      s += line(ex, ey, Ax, Ay, 'sight') + eye(ex, ey, Math.atan2(Ay - ey, Ax - ex) * 180 / Math.PI + 180) + text(ex + 26, ey - 6, '眼睛（光没经过透镜）', 'm', 'start');
+    } else if (st.scr) {
+      if (real && scrX < W - 5) { const ex = Math.max(LX + 40, scrX - 120), ey = 36;
+        s += line(ex, ey, Ix, Iy, 'sight') + eye(ex, ey, Math.atan2(Iy - ey, Ix - ex) * 180 / Math.PI + 180) + text(ex - 8, ey - 8, '眼睛', 'm', 'end'); }
+      else if (!real) s += eye(scrX + 40, CY, 0) + text(scrX + 52, CY + 34, '眼睛（被光屏挡住）', 'm');
+    } else {
+      const k = atF ? HH / F : HH / u;                       // 沿过光心那条光的去路
+      const ex = real ? Math.min(W - 60, Math.max(Ix + 110, LX + 200)) : LX + 150, ey = CY + k * (ex - LX);
+      if (ey < H - 20) s += eye(ex, ey, Math.atan(k) * 180 / Math.PI) + text(ex + 12, ey - 20, '眼睛', 'm');
+      else s += eye(W - 60, H - 30, Math.atan(k) * 180 / Math.PI) + text(W - 66, H - 46, '眼睛', 'm', 'end');
+    }
+    $('stage').innerHTML = s;
+    return { u, v, atF, real, m, scrOut: real && Ix >= W - 5 };
+  }
+
+  function drawView(kind, m) {                               // kind：up 正立 / down 倒立 / blur 一片光 / none
+    let s = `<line x1="14" y1="64" x2="106" y2="64" class="axis"/>`;
+    if (kind === 'blur') s += `<rect x="22" y="22" width="76" height="76" rx="8" style="fill:var(--ray)" opacity=".28"/>`;
+    else if (kind === 'none') s += `<text x="60" y="68" class="lbl m" text-anchor="middle" style="font-size:13px">看不到像</text>`;
+    else { const h = Math.max(8, Math.min(50, 18 * m)), y1 = kind === 'up' ? 64 - h : 64 + h, d = kind === 'up' ? 1 : -1, c = kind === 'obj' ? 'obj' : 'im';
+      s += `<line x1="60" y1="64" x2="60" y2="${y1 + d * 7}" class="${c}"/><polygon points="60,${y1} 53,${y1 + d * 11} 67,${y1 + d * 11}" class="${c}" style="stroke-width:1"/>`; }
+    $('view').innerHTML = s;
+  }
+
+  function render() {
+    const r = drawStage(), big = r.m > 1.03 ? '放大' : r.m < 0.97 ? '缩小' : '等大';
+    const where = st.u > 2.02 ? '在 2 倍焦距以外' : st.u > 1.98 ? '正好在 2 倍焦距' : st.u > 1.02 ? '在焦点和 2 倍焦距之间' : r.atF ? '正好在焦点上' : '在焦点以内';
+    $('uTxt').textContent = `${st.u.toFixed(2)} 倍焦距（${where}）`;
+    document.querySelectorAll('#presets button').forEach(b => b.classList.toggle('on', Math.abs(+b.dataset.u - st.u) < 0.011));
+    const f = [];
+    if (r.atF) f.push(['成像', '不成像'], ['原因', '光过了透镜是平行的，永远交不上']);
+    else if (r.real) f.push(['正倒', '倒立'], ['大小', `${big}（约 ${r.m.toFixed(1)} 倍）`], ['虚实', '实像：光真的交在一点'], ['位置', '透镜的另一侧'], ['光屏', '能接到'], ['像这样用的', st.u > 2.02 ? '照相机' : st.u > 1.98 ? '测焦距' : '投影仪']);
+    else f.push(['正倒', '正立'], ['大小', `放大（约 ${r.m.toFixed(1)} 倍）`], ['虚实', '虚像：光没有真的到那里'], ['位置', '和蜡烛同一侧，比蜡烛远'], ['光屏', '接不到'], ['像这样用的', '放大镜']);
+    $('facts').innerHTML = f.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+    let t, k, m = r.m;
+    if (st.eye === 'side') { t = '<b>蜡烛本身</b>：正着的，原来的大小。进眼睛的光没有经过透镜。'; k = 'up'; m = 1; drawView('up', 1); $('view').querySelectorAll('.im').forEach(e => e.setAttribute('class', 'obj')); $('seeTxt').innerHTML = t; return; }
+    if (r.atF) { t = '什么像也没有。光是平行射出来的，交不到一起。'; k = st.scr ? 'blur' : 'none'; }
+    else if (r.real && st.scr) { t = r.scrOut ? '像太远，光屏要放到画面外面去才接得到。' : `光屏上有一个<b>倒立、${big}的像</b>。光打在屏上向四面散开，所以站在哪儿都能看到。`; k = r.scrOut ? 'none' : 'down'; }
+    else if (r.real) { t = `一个<b>倒立、${big}的像</b>悬在空中。只有眼睛在像的后面、正对着透镜才看得到；偏到旁边就看不到了，因为光只朝一个方向走。`; k = 'down'; }
+    else if (st.scr) { t = '光屏上只是<b>一片亮光，没有像</b>，眼睛也被屏挡住了。把光屏拿掉，才能透过透镜看到虚像。'; k = 'blur'; }
+    else { t = `一个<b>正立、放大的虚像</b>。看到的还是蜡烛发出的光，只是被透镜改了方向，眼睛就以为它在更远、更大的地方。`; k = 'up'; }
+    drawView(k, m); $('seeTxt').innerHTML = t;
+  }
+
+  function set(o) { Object.assign(st, o); $('u').value = st.u; $(st.scr ? 'scrOn' : 'scrOff').checked = true; $(st.eye === 'side' ? 'eyeSide' : 'eyeThrough').checked = true; render(); }
+  $('u').addEventListener('input', e => { st.u = +e.target.value; render(); });
+  document.querySelectorAll('input[name=scr]').forEach(e => e.addEventListener('change', () => { st.scr = $('scrOn').checked; render(); }));
+  document.querySelectorAll('input[name=eye]').forEach(e => e.addEventListener('change', () => { st.eye = $('eyeSide').checked ? 'side' : 'through'; render(); }));
+  $('presets').addEventListener('click', e => { const b = e.target.closest('button'); if (b) set({ u: +b.dataset.u }); });
+  const DEMO = { '1a': { u: .5, scr: false, eye: 'through' }, '1b': { u: .5, scr: false, eye: 'side' }, '2a': { u: 2.6, scr: false, eye: 'through' }, '2b': { u: 2.6, scr: false, eye: 'side' },
+    '3a': { u: 1.5, scr: true, eye: 'through' }, '3b': { u: 1.5, scr: false, eye: 'through' }, '3c': { u: .5, scr: true, eye: 'through' } };
+  document.querySelector('.qa').addEventListener('click', e => { const b = e.target.closest('button[data-demo]'); if (!b) return; set(DEMO[b.dataset.demo]); $('stage').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  render();
+})();
+</script>
+
+</body>
+</html>
