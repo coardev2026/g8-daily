@@ -118,24 +118,24 @@ dt { color: var(--muted); } dd { margin: 0; font-weight: 600; }
 
   <section class="qa">
     <div class="panel">
-      <h2>问题一　用放大镜时，是不是只能看到虚像？</h2>
-      <p>透过透镜看，看到的只有<b>像</b>。蜡烛发出的光被透镜改了方向，眼睛顺着改过的方向往回找，就以为蜡烛在更远、更大的地方。想看蜡烛本身，要绕过透镜直接看。</p>
-      <div class="row"><button type="button" data-demo="1a">演示：透过透镜看</button><button type="button" data-demo="1b">演示：绕过透镜看</button></div>
+      <h2>考点一　物近、像远、像变大</h2>
+      <p>成实像时，蜡烛<b>靠近</b>透镜，像就<b>远离</b>透镜，而且<b>变大</b>。要让光屏上的像变大：蜡烛靠近透镜，光屏远离透镜。</p>
+      <div class="row"><button type="button" data-demo="4a">① 蜡烛在远处</button><button type="button" data-demo="4b">② 推近一些</button><button type="button" data-demo="4c">③ 再推近</button></div>
     </div>
     <div class="panel">
-      <h2>问题二　蜡烛比焦点远时，像和蜡烛都能看到吗？</h2>
-      <p>都能看到，但要换位置。对着透镜看，看到的是另一侧那个<b>倒立的实像</b>；绕过透镜，才是蜡烛本身。凡是穿过透镜的光，看到的都是像。</p>
-      <div class="row"><button type="button" data-demo="2a">演示：对着透镜看</button><button type="button" data-demo="2b">演示：绕过透镜看</button></div>
+      <h2>考点二　实像能用光屏承接，虚像不能</h2>
+      <p><b>实像</b>：光真的交在一点，光屏放在那里就接得到。<b>虚像</b>：光过了透镜一直在散开，哪儿都不相交，光屏上只有一片亮光。</p>
+      <div class="row"><button type="button" data-demo="3a">实像：光屏接得到</button><button type="button" data-demo="3c">虚像：光屏接不到</button></div>
     </div>
     <div class="panel">
-      <h2>问题三　没有光屏会怎么样？</h2>
-      <p>像还在原来的位置。<b>有光屏</b>：光打在屏上向四面散开，站在哪儿都能看到。<b>没有光屏</b>：光交在那一点后继续往前走，只有眼睛正好在光的去路上才看得到。</p>
-      <div class="row"><button type="button" data-demo="3a">演示：有光屏</button><button type="button" data-demo="3b">演示：没有光屏</button></div>
+      <h2>考点三　光屏上接不到像，怎样观察？</h2>
+      <p>取下光屏，从<b>光屏一侧透过凸透镜</b>看，能看到一个正立、放大的虚像。虚像和蜡烛在透镜的同一侧。</p>
+      <div class="row"><button type="button" data-demo="3c">放着光屏：看不到</button><button type="button" data-demo="1a">取下光屏，透过透镜看</button></div>
     </div>
     <div class="panel">
-      <h2>问题四　虚像为什么接不到光屏？</h2>
-      <p>光屏能接到像，靠的是<b>光真的交在屏上一点</b>。成虚像时，光过了透镜一直在散开，在哪儿都不相交，所以光屏放在透镜后面哪个位置，接到的都只是一片亮光。虚像所在的那个地方（蜡烛那一侧）根本没有透镜过来的光，那里只是眼睛“往回找”出来的位置，光屏放过去也没用。</p>
-      <div class="row"><button type="button" data-demo="3c">演示：放上光屏，只有一片亮光</button><button type="button" data-demo="1a">演示：拿掉光屏，用眼睛看</button></div>
+      <h2>想一想　放大镜里看到的是蜡烛本身吗？</h2>
+      <p>不是。透过透镜看到的都是<b>像</b>：光被透镜改了方向，眼睛顺着往回找，就以为蜡烛在更远、更大的地方。绕过透镜直接看，才是蜡烛本身。（帮助理解，考试不考）</p>
+      <div class="row"><button type="button" data-demo="1a">透过透镜看</button><button type="button" data-demo="1b">绕过透镜看</button></div>
     </div>
   </section>
 </div>
@@ -238,7 +238,7 @@ dt { color: var(--muted); } dd { margin: 0; font-weight: 600; }
   document.querySelectorAll('input[name=eye]').forEach(e => e.addEventListener('change', () => { st.eye = $('eyeSide').checked ? 'side' : 'through'; render(); }));
   $('presets').addEventListener('click', e => { const b = e.target.closest('button'); if (b) set({ u: +b.dataset.u }); });
   const DEMO = { '1a': { u: .5, scr: false, eye: 'through' }, '1b': { u: .5, scr: false, eye: 'side' }, '2a': { u: 2.6, scr: false, eye: 'through' }, '2b': { u: 2.6, scr: false, eye: 'side' },
-    '3a': { u: 1.5, scr: true, eye: 'through' }, '3b': { u: 1.5, scr: false, eye: 'through' }, '3c': { u: .5, scr: true, eye: 'through' } };
+    '3a': { u: 1.5, scr: true, eye: 'through' }, '4a': { u: 2.6, scr: true, eye: 'through' }, '4b': { u: 1.8, scr: true, eye: 'through' }, '4c': { u: 1.35, scr: true, eye: 'through' }, '3b': { u: 1.5, scr: false, eye: 'through' }, '3c': { u: .5, scr: true, eye: 'through' } };
   document.querySelector('.qa').addEventListener('click', e => { const b = e.target.closest('button[data-demo]'); if (!b) return; set(DEMO[b.dataset.demo]); $('stage').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   render();
   const sg = document.querySelector('.stage'); sg.scrollLeft = (sg.scrollWidth - sg.clientWidth) / 2;   // 窄屏时先把透镜放在中间
