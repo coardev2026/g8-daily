@@ -23,13 +23,14 @@
 body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.65;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
 .wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.wrap > * { min-width: 0; max-width: 100%; }
 h1 { font-size: 24px; margin: 0; text-wrap: balance; }
 h2 { font-size: 17px; margin: 0 0 6px; }
 p { margin: 0; }
 .lead { color: var(--muted); }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
 .stage { overflow-x: auto; }
-.stage svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.stage svg { display: block; width: 100%; min-width: 560px; height: auto; }
 .ctrl { display: flex; flex-direction: column; gap: 12px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .row > label.t { font-weight: 600; min-width: 0; }
@@ -240,6 +241,7 @@ dt { color: var(--muted); } dd { margin: 0; font-weight: 600; }
     '3a': { u: 1.5, scr: true, eye: 'through' }, '3b': { u: 1.5, scr: false, eye: 'through' }, '3c': { u: .5, scr: true, eye: 'through' } };
   document.querySelector('.qa').addEventListener('click', e => { const b = e.target.closest('button[data-demo]'); if (!b) return; set(DEMO[b.dataset.demo]); $('stage').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   render();
+  const sg = document.querySelector('.stage'); sg.scrollLeft = (sg.scrollWidth - sg.clientWidth) / 2;   // 窄屏时先把透镜放在中间
 })();
 </script>
 
